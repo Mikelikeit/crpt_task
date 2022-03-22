@@ -14,7 +14,9 @@ def get_data_near_earth_objects(api_key, start_date=datetime(2022, 9, 7).date(),
     get_info = requests.get(url_nasa_api).json()
     data_earth_objects = get_info['near_earth_objects']
     search_values_dict = {}
+    
     # Собираем данные из json в словарь для сортировки используя в качестве ключа словарь.
+    
     for _date, value in data_earth_objects.items():
         for i in range(len(value)):
             final_search_dict = {}
@@ -27,10 +29,17 @@ def get_data_near_earth_objects(api_key, start_date=datetime(2022, 9, 7).date(),
                                                        absolute_magnitude_h=absolute_magnitude_h,
                                                        is_potentially_hazardous_asteroid=
                                                        is_potentially_hazardous_asteroid)
+            
+    # Словарь для сортировки где ключ это строковое представление словоря, а значение нужные нам для сортировки данные.
+    
             search_values_dict[f'{final_search_dict}'] = absolute_magnitude_h
+      
     # Сортируем наш словарь.
+    
         sorted_search_values_dict = sorted(search_values_dict.items(), key=lambda x: x[1], reverse=True)
+      
     # Отрисовыем нужные данные в требуемом формате.
+    
         print('\n', _date)
         count = 1
         top_count = top

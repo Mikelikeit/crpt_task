@@ -1,57 +1,51 @@
 import requests
+from datetime import datetime
+
+API_KEY = 'DEMO_KEY'
 
 
-def get_data_near_earth_objects(api_key, start_date='2016-09-07', end_date='2016-09-08', top=10):
+def get_data_near_earth_objects(api_key, start_date=datetime(2022, 9, 7).date(), end_date=datetime(2022, 9, 8).date(),
+                                top=8):
     # Функция получает сведения из Api Nasa об объектах околоземной орбиты за заданный промежуток времени в днях.
     # Возвращает отсортированный результат и нужное количество объектов.
+    # https://api.nasa.gov/neo/rest/v1/feed?start_date=2022-02-23&end_date=2022-02-23&api_key=DEMO_KEY
 
-    try:
-        urls_nasa_api = f'https://api.nasa.gov/neo/rest/v1/feed?start_date={start_date}&end_date={end_date}&api_key={api_key}'
-        get_info = requests.get(urls_nasa_api).json()
-        date_earth_objects = get_info['near_earth_objects']
-        data_near_earth_objects_dict = {}
-        finish_data_near_earth_objects_dict = {}
-        # Из ответа апи вынимаем и помещаем в словарь нужные нам данные
-        for key in date_earth_objects.keys():
-            for i in range(len(date_earth_objects[key])):
-                absolute_magnitude_h = date_earth_objects[key][i]['absolute_magnitude_h']
-                data_near_earth_objects_dict[absolute_magnitude_h] = dict(date=key,
-                                                                          neo_reference_id=
-                                                                          date_earth_objects[key][i][
-                                                                              'neo_reference_id'],
-                                                                          name=date_earth_objects[key][i]['name'],
-                                                                          is_potentially_hazardous_asteroid=
-                                                                          date_earth_objects[key][i][
-                                                                              'is_potentially_hazardous_asteroid'])
-        # Сортируем данные по убыванию по ключу absolute_magnitude_h.
-        sorted_result = sorted(data_near_earth_objects_dict.items(), key=lambda x: x[0], reverse=True)
-        # Обрабатываем отсортированный словарь к нужной нам форме для вывода.
-        for y in sorted_result:
-            finish_data_near_earth_objects_dict[f'{y[1]["date"]} {y[1]["neo_reference_id"]}'] = dict(name=y[1]["name"],
-                                                                                                     absolute_magnitude_h=
-                                                                                                     y[
-                                                                                                         0],
-                                                                                                     is_potentially_hazardous_asteroid=
-                                                                                                     y[1][
-                                                                                                       "is_potentially_hazardous_asteroid"])
-        # Распечатываем заданное колличество объектов при запуске функции.
-        top_count = top
+    url_nasa_api = f'https://api.nasa.gov/neo/rest/v1/feed?start_date={start_date}&end_date={end_date}&api_key={api_key}'
+    get_info = requests.get(url_nasa_api).json()
+    data_earth_objects = get_info['near_earth_objects']
+    search_values_dict = {}
+    # Собираем данные из json в словарь для сортировки используя в качестве ключа словарь.
+    for _date, value in data_earth_objects.items():
+        for i in range(len(value)):
+            final_search_dict = {}
+            neo_reference_id = value[i]['neo_reference_id']
+            name = value[i]['name']
+            absolute_magnitude_h = value[i]['absolute_magnitude_h']
+            is_potentially_hazardous_asteroid = value[i]['is_potentially_hazardous_asteroid']
+
+            final_search_dict[neo_reference_id] = dict(name=name,
+                                                       absolute_magnitude_h=absolute_magnitude_h,
+                                                       is_potentially_hazardous_asteroid=
+                                                       is_potentially_hazardous_asteroid)
+            search_values_dict[f'{final_search_dict}'] = absolute_magnitude_h
+    # Сортируем наш словарь.
+        sorted_search_values_dict = sorted(search_values_dict.items(), key=lambda x: x[1], reverse=True)
+    # Отрисовыем нужные данные в требуемом формате.
+        print('\n', _date)
         count = 1
-        for key in finish_data_near_earth_objects_dict:
-
+        top_count = top
+        for search_dataframe in sorted_search_values_dict:
+            d = eval(search_dataframe[0])  # Превращаем словарь в строковом представлении в обычный словарь.
             if count <= top_count:
-                print(f'{key}: {finish_data_near_earth_objects_dict[key]}')
-                count += 1
+                for k, v in d.items():
+                    print(f'{count} {k}: {v}')
+                    count += 1
             else:
                 break
 
-    except Exception as e:
-        print(e)
-
-
-def main():
-    get_data_near_earth_objects()
-
 
 if __name__ == '__main__':
-    main()
+    try:
+        get_data_near_earth_objects(API_KEY)
+    except Exception as e:
+        print(e)

@@ -38,7 +38,7 @@ def get_data_near_earth_objects(api_key, start_date=datetime(2022, 9, 7).date(),
     
         sorted_search_values_dict = sorted(search_values_dict.items(), key=lambda x: x[1], reverse=True)
       
-    # Отрисовыем нужные данные в требуемом формате.
+    # Отрисовываем нужные данные в требуемом формате.
     
         print('\n', _date)
         count = 1
